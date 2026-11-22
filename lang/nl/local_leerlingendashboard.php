@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['choosecohort'] = 'Kies een klas...';
+$string['chooselaptop'] = 'Kies je laptop';
 $string['class'] = 'Klas';
 $string['classoverview'] = 'Klasoverzicht';
 $string['colcourse'] = 'Cursus';
@@ -39,10 +40,18 @@ $string['errornotenrolled'] = 'De leerling is niet ingeschreven in deze cursus.'
 $string['errornotincohort'] = 'De leerling zit niet in deze klas.';
 $string['eventcoursepinned'] = 'Cursus vastgezet voor leerling';
 $string['eventcourseunpinned'] = 'Cursus losgemaakt voor leerling';
+$string['hiddenassignment'] = 'en {$a} opdracht die je later ontgrendelt';
+$string['hiddenassignments'] = 'en {$a} opdrachten die je later ontgrendelt';
 $string['leerlingendashboard:viewclass'] = 'Het klasoverzicht bekijken en cursussen vastzetten voor leerlingen';
+$string['leerlingendashboard:viewown'] = 'Mijn Muzieklab bekijken (eigen huidige cursus, voortgang en open opdrachten)';
+$string['locked'] = 'Nog vergrendeld';
+$string['mycurrentcourse'] = 'Mijn huidige cursus';
+$string['mymuzieklab'] = 'Mijn Muzieklab';
 $string['nocohorts'] = 'Er zijn nog geen klassen (cohorten).';
 $string['nocourse'] = 'geen';
+$string['nocurrentcourse'] = 'Je hebt nog geen cursus geopend.';
 $string['nogroupmates'] = 'geen';
+$string['noopenassignments'] = 'Geen open opdrachten';
 $string['nostudents'] = 'Deze klas heeft geen leerlingen.';
 $string['notavailable'] = '–';
 $string['notenrolled'] = 'Niet meer ingeschreven';
@@ -51,6 +60,7 @@ $string['percent'] = '{$a} %';
 $string['pin'] = 'Vastzetten';
 $string['pincourse'] = 'Cursus om vast te zetten voor {$a}';
 $string['pinned'] = 'Vastgezet';
+$string['pinnedbyteacher'] = 'Vastgezet door je leerkracht';
 $string['pinplaceholder'] = 'Vastzetten op...';
 $string['pluginname'] = 'Leerlingendashboard';
 $string['privacy:metadata:pin'] = 'Cursussen die een leerkracht heeft vastgezet als huidige cursus van een leerling.';

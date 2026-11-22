@@ -8,8 +8,10 @@ cd /var/www/moodle/public
 sudo -u www-data /usr/bin/php8.3 local/leerlingendashboard/cli/testdata_vm.php --run
 ```
 
-Het script stopt zonder iets te doen als `lln-c` al bestaat. Alles gebeurt in één
-databasetransactie; bij een fout wordt niets bewaard.
+Het script heeft twee delen. Het deel van fase 2 draait alleen als `lln-c` nog niet bestaat,
+het deel van fase 3 alleen als de groep "Duo B" nog niet bestaat. Bestaan ze allebei, dan
+stopt het zonder iets te doen. Alles gebeurt in één databasetransactie; bij een fout wordt
+niets bewaard.
 
 ## Beginsituatie (snapshot)
 
@@ -56,12 +58,22 @@ Wachtwoord van alle nieuwe accounts: `Test-Muzieklab1!`
 - **Voltooiing** (handmatig): de inzendingen hierboven, plus de laptop-keuze voor lln-a.
 - **Laatst geopend** (`user_lastaccess`): zie de tabel hieronder.
 
+### Deel fase 3 (Mijn Muzieklab)
+
+- **Groep "Duo B"** in Testcursus B (lln-f, lln-h) met zichtbaarheid **Eigen**: de
+  leerkracht ziet lln-h als groepsgenoot van lln-f, lln-f zelf niet.
+- **Opdracht 4 - verborgen tot ontgrendeld** in Muzieklab test: toegangsbeperking "Opdracht 1
+  voltooid", helemaal verborgen zolang die niet voldaan is. lln-a heeft ze ingediend.
+  Ze heeft voltooiing, dus ze telt mee in de voortgang van wie ze ziet (lln-a, lln-b).
+- **Deadline** op Opdracht 1: een week na het draaien van het script, 09:00 (tijdzone van de
+  site, Europe/London; lln-a, lln-b en lk-test staan op Europe/Brussels en zien 10:00).
+
 ## Verwacht resultaat op de klaspagina
 
 | leerkracht | cohort | leerling | huidige cursus | % | groepsgenoten | open | laptop |
 |---|---|---|---|---|---|---|---|
-| lk-test | ma 16u | lln-a | Muzieklab test | 75 | Leerling C, Leerkracht Test | nee | Laptop 3 |
-| lk-test | ma 16u | lln-b | Muzieklab test | 25 | Leerkracht Test | ja (concept) | Laptop 7 |
+| lk-test | ma 16u | lln-a | Muzieklab test | 60 | Leerling C, Leerkracht Test | nee | Laptop 3 |
+| lk-test | ma 16u | lln-b | Muzieklab test | 20 | Leerkracht Test | ja (concept) | Laptop 7 |
 | lk-test | ma 16u | lln-c | Testcursus A | 100 | Leerling F, Leerkracht Twee | nee | Laptop 5 |
 | lk-test | ma 16u | lln-d | Muzieklab test | 0 | geen | ja | – |
 | lk-test | ma 16u | lln-e | (niet getoond: geschorst) | | | | |
@@ -69,7 +81,7 @@ Wachtwoord van alle nieuwe accounts: `Test-Muzieklab1!`
 | lk-test | woe 14u | lln-g | Testcursus A | 0 | Leerling D | ja | – (verborgen keuze) |
 | lk-test | woe 14u | lln-h | Testcursus A + waarschuwing "niet meer ingeschreven" | – | geen | ja | – |
 | lk-test2 | woe 14u | lln-d | Testcursus A | 0 | Leerling G | ja | – |
-| lk-test2 | woe 14u | lln-f | Testcursus B | 0 | geen | ja (offline opdracht) | – |
+| lk-test2 | woe 14u | lln-f | Testcursus B | 0 | Leerling H (groep "Eigen": de leerkracht ziet alles) | ja (offline opdracht) | – |
 | lk-test2 | woe 14u | lln-g | Testcursus A | 0 | Leerling D | ja | – |
 | lk-test2 | woe 14u | lln-h | Testcursus A + waarschuwing | – | geen | ja | – |
 | lk-test2 | ma 16u | lln-a, lln-b | geen | – | – | – | – |
@@ -87,3 +99,16 @@ Een paar regels die je hiermee test:
 - Een opdracht in een verborgen sectie telt niet mee.
 - Elke leerkracht ziet alleen zijn of haar eigen cursussen. Bij lln-f ziet lk-test
   Testcursus A en lk-test2 Testcursus B.
+
+## Verwacht resultaat in Mijn Muzieklab (als de leerling zelf)
+
+| leerling | huidige cursus | % | groepsgenoten | open opdrachten | laptop | menulink |
+|---|---|---|---|---|---|---|
+| lln-a | Muzieklab test | 60 | Leerling C, Leerkracht Test | geen | Laptop 3 | ja |
+| lln-b | Muzieklab test | 20 | Leerkracht Test | Opdracht 1 (met deadline), Opdracht 3, Opdracht 4 | Laptop 7 | ja |
+| lln-c | Testcursus A | 100 | Leerling F, Leerkracht Twee | geen | Laptop 5 | ja |
+| lln-d | Muzieklab test | 0 | geen | Opdracht 1 (met deadline), Opdracht 3 (vergrendeld), "en 1 opdracht die je later ontgrendelt" | link "Kies je laptop" | ja |
+| lln-f | Testcursus B | 0 | geen (groep "Eigen") | Opdracht zonder online inzending | – | ja |
+| lln-g | Testcursus A | 0 | Leerling D | Duo-opdracht, Opdracht individueel | link "Kies je laptop" | ja |
+| lln-h | geen huidige cursus (Testcursus A: inschrijving geschorst, Testcursus B nooit geopend) | | | | | ja |
+| lk-test, lk-test2 | (geen menulink: niet in een cohort) | | | | | nee |

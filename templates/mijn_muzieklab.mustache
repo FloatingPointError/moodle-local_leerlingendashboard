@@ -1,0 +1,119 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_leerlingendashboard/mijn_muzieklab
+
+    Mijn Muzieklab: the current course of the student (design fase 3, chapter 2).
+
+    Context variables required for this template:
+    * hascourse, mycoursesurl - whether there is a current course; link to My courses otherwise
+    * coursename, courseurl, pinned - the current course
+    * hasprogress, progress - course completion in percent
+    * groupmates - names, or "none"
+    * hasassignments, assignments (name, url, locked, due), hiddenassignments - open assignments
+    * haslaptop, laptop, chooselaptopurl - laptop number, or a link to the laptop choice
+
+    Example context (json):
+    {
+        "hascourse": true,
+        "mycoursesurl": "https://example.com/my/courses.php",
+        "coursename": "Muzieklab test",
+        "courseurl": "https://example.com/course/view.php?id=2",
+        "pinned": true,
+        "hasprogress": true,
+        "progress": 25,
+        "groupmates": "Leerkracht Test",
+        "hasassignments": true,
+        "assignments": [
+            {"name": "Opdracht 1", "url": "https://example.com/mod/assign/view.php?id=15", "locked": false, "due": "Due: 1/12/26, 09:00"},
+            {"name": "Opdracht 3", "url": "", "locked": true, "due": ""}
+        ],
+        "hiddenassignments": "and 1 assignment you will unlock later",
+        "haslaptop": false,
+        "laptop": "",
+        "chooselaptopurl": "https://example.com/mod/choice/view.php?id=22"
+    }
+}}
+<div class="local_leerlingendashboard-mijn">
+    {{^hascourse}}
+        <div class="alert alert-info">
+            {{#str}} nocurrentcourse, local_leerlingendashboard {{/str}}
+            <a href="{{mycoursesurl}}">{{#str}} mycourses, core {{/str}}</a>
+        </div>
+    {{/hascourse}}
+    {{#hascourse}}
+    <section class="card">
+        <div class="card-body">
+            <h3 class="h5 card-title">{{#str}} mycurrentcourse, local_leerlingendashboard {{/str}}</h3>
+            <p class="h4 mb-1">
+                <a href="{{courseurl}}">{{coursename}}</a>
+                {{#pinned}}
+                    <span class="badge bg-primary ms-1 align-middle">{{#str}} pinnedbyteacher, local_leerlingendashboard {{/str}}</span>
+                {{/pinned}}
+            </p>
+
+            <dl class="row mt-3 mb-0">
+                <dt class="col-sm-3">{{#str}} colprogress, local_leerlingendashboard {{/str}}</dt>
+                <dd class="col-sm-9">
+                    {{#hasprogress}}
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0"
+                                 aria-valuemax="100" aria-label="{{#str}} colprogress, local_leerlingendashboard {{/str}}">
+                                <div class="progress-bar" style="width: {{progress}}%"></div>
+                            </div>
+                            <span>{{progress}} %</span>
+                        </div>
+                    {{/hasprogress}}
+                    {{^hasprogress}}{{#str}} notavailable, local_leerlingendashboard {{/str}}{{/hasprogress}}
+                </dd>
+
+                <dt class="col-sm-3">{{#str}} colgroupmates, local_leerlingendashboard {{/str}}</dt>
+                <dd class="col-sm-9">{{groupmates}}</dd>
+
+                <dt class="col-sm-3">{{#str}} colopen, local_leerlingendashboard {{/str}}</dt>
+                <dd class="col-sm-9">
+                    {{^hasassignments}}{{#str}} noopenassignments, local_leerlingendashboard {{/str}}{{/hasassignments}}
+                    {{#hasassignments}}
+                        <ul class="list-unstyled mb-0">
+                            {{#assignments}}
+                                <li>
+                                    {{#locked}}
+                                        {{#pix}} i/lock, core {{/pix}}<span class="text-muted">{{name}}</span>
+                                        <span class="badge bg-secondary ms-1">{{#str}} locked, local_leerlingendashboard {{/str}}</span>
+                                    {{/locked}}
+                                    {{^locked}}<a href="{{url}}">{{name}}</a>{{/locked}}
+                                    {{#due}}<span class="text-muted small ms-1">{{due}}</span>{{/due}}
+                                </li>
+                            {{/assignments}}
+                            {{#hiddenassignments}}<li class="text-muted">{{hiddenassignments}}</li>{{/hiddenassignments}}
+                        </ul>
+                    {{/hasassignments}}
+                </dd>
+
+                <dt class="col-sm-3">{{#str}} collaptop, local_leerlingendashboard {{/str}}</dt>
+                <dd class="col-sm-9">
+                    {{#haslaptop}}{{laptop}}{{/haslaptop}}
+                    {{^haslaptop}}
+                        {{#chooselaptopurl}}<a href="{{chooselaptopurl}}">{{#str}} chooselaptop, local_leerlingendashboard {{/str}}</a>{{/chooselaptopurl}}
+                        {{^chooselaptopurl}}{{#str}} notavailable, local_leerlingendashboard {{/str}}{{/chooselaptopurl}}
+                    {{/haslaptop}}
+                </dd>
+            </dl>
+        </div>
+    </section>
+    {{/hascourse}}
+</div>

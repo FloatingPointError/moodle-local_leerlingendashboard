@@ -33,6 +33,9 @@ class access {
     /** @var string The capability that gives access to the class overview. */
     public const CAPABILITY = 'local/leerlingendashboard:viewclass';
 
+    /** @var string The capability that gives access to Mijn Muzieklab. */
+    public const CAPABILITY_OWN = 'local/leerlingendashboard:viewown';
+
     /**
      * Whether the user has the capability in the system context (manager, admin).
      *
@@ -94,5 +97,30 @@ class access {
         }
         $context = \context_course::instance($courseid, IGNORE_MISSING);
         return $context && has_capability(self::CAPABILITY, $context, $userid);
+    }
+
+    /**
+     * Whether the user may open Mijn Muzieklab (design fase 3, chapter 4).
+     *
+     * @param int|null $userid User id, null for the current user.
+     * @return bool
+     */
+    public static function can_view_own(?int $userid = null): bool {
+        if (!isloggedin() || isguestuser()) {
+            return false;
+        }
+        return has_capability(self::CAPABILITY_OWN, context_system::instance(), $userid);
+    }
+
+    /**
+     * Whether the user is a member of at least one cohort, i.e. a student of a class.
+     *
+     * @param int|null $userid User id, null for the current user.
+     * @return bool
+     */
+    public static function is_cohort_member(?int $userid = null): bool {
+        global $DB, $USER;
+        $userid = $userid ?? (int)$USER->id;
+        return $DB->record_exists('cohort_members', ['userid' => $userid]);
     }
 }

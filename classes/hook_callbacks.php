@@ -29,24 +29,39 @@ use navigation_node;
  * @license    https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hook_callbacks {
-    /** @var string Key of the node in the primary navigation. */
+    /** @var string Key of the class overview node in the primary navigation. */
     public const NAVKEY = 'local_leerlingendashboard';
 
+    /** @var string Key of the Mijn Muzieklab node in the primary navigation. */
+    public const NAVKEY_OWN = 'local_leerlingendashboard_mijn';
+
     /**
-     * Add a link to the class overview in the primary navigation.
+     * Add links to the class overview (teachers) and Mijn Muzieklab (students in a cohort)
+     * in the primary navigation.
      *
      * @param primary_extend $hook
      */
     public static function extend_primary_navigation(primary_extend $hook): void {
-        if (during_initial_install() || !access::can_view()) {
+        if (during_initial_install() || !isloggedin() || isguestuser()) {
             return;
         }
-        $hook->get_primaryview()->add(
-            get_string('classoverview', 'local_leerlingendashboard'),
-            new moodle_url('/local/leerlingendashboard/index.php'),
-            navigation_node::TYPE_ROOTNODE,
-            null,
-            self::NAVKEY
-        );
+        if (access::can_view_own() && access::is_cohort_member()) {
+            $hook->get_primaryview()->add(
+                get_string('mymuzieklab', 'local_leerlingendashboard'),
+                new moodle_url('/local/leerlingendashboard/mijn.php'),
+                navigation_node::TYPE_ROOTNODE,
+                null,
+                self::NAVKEY_OWN
+            );
+        }
+        if (access::can_view()) {
+            $hook->get_primaryview()->add(
+                get_string('classoverview', 'local_leerlingendashboard'),
+                new moodle_url('/local/leerlingendashboard/index.php'),
+                navigation_node::TYPE_ROOTNODE,
+                null,
+                self::NAVKEY
+            );
+        }
     }
 }
