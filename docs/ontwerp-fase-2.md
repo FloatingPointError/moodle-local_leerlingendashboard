@@ -1,6 +1,6 @@
 # Ontwerp fase 2: klasoverzicht
 
-Status: concept, reviewrondes 1 tot 3 van Michel verwerkt (22-11-2026). Nog geen code.
+Status: concept, reviewrondes 1 tot 4 van Michel verwerkt (22-11-2026).
 Basis: CLAUDE.md, Moodle 5.2 (5.2.5+, build 20261117), PHP 8.3.
 
 ## 1. Overzicht
@@ -120,20 +120,84 @@ Opmerking: `user_lastaccess` wordt hoogstens elke 60 seconden bijgewerkt
 
 ## 5. Kolom 3: Cursusvoltooiing in %
 
-Geen eigen query: Moodle's eigen berekening gebruiken, zodat het cijfer gelijk is aan wat
-Moodle elders toont (Mijn cursussen, cursusoverzicht).
+Het cijfer moet hetzelfde zijn als wat de leerling zelf bij Mijn cursussen ziet: de
+activiteitsvoltooiing zoals Moodle die berekent, **met de zichtbaarheid van de leerling**.
+
+### 5.1 Waarom niet gewoon `get_course_progress_percentage()`
+
+De eerste versie van dit ontwerp gebruikte
+`\core_completion\progress::get_course_progress_percentage($course, $userid)`. Op de
+test-VM bleek dat die functie de zichtbaarheid bepaalt voor de **ingelogde gebruiker**,
+niet voor `$userid`: `completion_info::get_activities()` gebruikt
+`get_fast_modinfo($course)` van de huidige gebruiker. Een leerkracht ziet verborgen
+activiteiten, dus die tellen mee en het percentage daalt. Gemeten op 22-11-2026:
+
+| leerling, cursus            | bekeken door leerkracht | bekeken door leerling |
+|-----------------------------|-------------------------|-----------------------|
+| lln-a, Muzieklab test       | 60 %                    | 75 %                  |
+| lln-c, Testcursus A         | 67 %                    | 100 %                 |
+| lln-f, Testcursus A         | 33 %                    | 50 %                  |
+
+Daarnaast bewaart de functie het resultaat in een request-cache per (cursus, leerling),
+los van wie kijkt.
+
+### 5.2 Berekening (beslist in reviewronde 4)
+
+Dezelfde stappen als Moodle, maar met modinfo van de leerling. Alleen het selecteren van
+de activiteiten doen we zelf; het tellen van de voltooide activiteiten blijft Moodle's
+eigen `count_modules_completed()`.
 
 ```php
-$pct = \core_completion\progress::get_course_progress_percentage($course, $userid);
+$completion = new completion_info($course);
+if (!$completion->is_enabled() || !$completion->is_tracked_user($userid)) {
+    return null;                                    // cel: "–"
+}
+if ($completion->is_course_complete($userid)) {
+    return 100;
+}
+$cmids = [];
+foreach (get_fast_modinfo($course, $userid)->get_cms() as $cm) {   // modinfo van de leerling
+    if ($cm->completion == COMPLETION_TRACKING_NONE || $cm->deletioninprogress) {
+        continue;
+    }
+    if (!$cm->is_visible_on_course_page()) {        // zoals de leerling het ziet
+        continue;
+    }
+    if (!empty($cm->availability) || (int)$cm->groupmode === SEPARATEGROUPS
+            || !empty($cm->groupingid)) {
+        $info = new \core_availability\info_module($cm);
+        if (!$info->filter_user_list([$userid => (object)['id' => $userid]])) {
+            continue;                               // groeps-/groeperingsbeperking
+        }
+    }
+    $cmids[] = $cm->id;
+}
+if (!$cmids) {
+    return null;                                    // cel: "–"
+}
+return $completion->count_modules_completed($userid, $cmids) / count($cmids) * 100;
 ```
 
-- Geeft `null` als voltooiing in de cursus uit staat, de leerling niet gevolgd wordt
-  (geen leerlingrol) of er geen activiteiten met voltooiing zijn. Cel toont dan "–".
-  Wordt de leerling wel gevolgd maar is er nog niets voltooid, dan toont de cel "0 %"
-  (beslist).
-- Is de cursus als geheel voltooid, dan geeft Moodle 100.
-- Afronden op een geheel getal voor weergave.
-- De berekening kijkt naar de activiteiten die zichtbaar zijn voor díe leerling.
+Dit is een kopie van de logica in `completion_info::get_user_activities_with_completion()`
+(Moodle 5.2). Bij een Moodle-upgrade die code opnieuw vergelijken; een PHPUnit-test
+vergelijkt onze uitkomst met `get_course_progress_percentage()` terwijl de leerling zelf
+is ingelogd.
+
+### 5.3 Weergave
+
+- `null` (voltooiing in de cursus uit, leerling niet gevolgd, bv. niet meer
+  ingeschreven, of geen activiteiten met voltooiing): cel toont "–".
+- Wel gevolgd maar nog niets voltooid: "0 %" (beslist).
+- Cursus als geheel voltooid: 100 %.
+- Afronden op een geheel getal.
+- Activiteiten met een toegangsbeperking die de leerling grijs ziet, tellen mee, net
+  als bij Moodle zelf. Een beperking die de activiteit helemaal verbergt, telt niet mee.
+  Dat is de voltooiingsregel van Moodle en staat los van de regel voor open opdrachten
+  in hoofdstuk 7.
+
+Gecontroleerd op de test-VM, ingelogd als `lk-test`: lln-a 75, lln-b 25, lln-d 0
+(Muzieklab test); lln-c 100, lln-f 50, lln-g 0 (Testcursus A); lln-f 0 (Testcursus B).
+Dat zijn dezelfde cijfers als de leerling zelf ziet.
 
 ## 6. Kolom 4: Groepsgenoten
 
@@ -440,6 +504,11 @@ Ronde 3:
 
 13. De huidige cursus wordt per leerkracht bepaald, alleen binnen de eigen cursussen.
     Vastzettingen gelden per cursus (meer per leerling mogelijk), zie 4.1 en 9.4.
+
+Ronde 4:
+
+14. Voortgang wordt berekend met de zichtbaarheid van de leerling, niet van de
+    leerkracht (zie 5.2).
 
 ## 14. Nog open
 
