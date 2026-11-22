@@ -17,8 +17,8 @@
 /**
  * Capabilities for local_leerlingendashboard.
  *
- * The capability is defined at course level, because teachers get their role per course.
- * See docs/ontwerp-fase-2.md, chapter 9.
+ * viewclass is defined at course level, because teachers get their role per course
+ * (docs/ontwerp-fase-2.md, chapter 9). viewown is for every logged-in user (docs/ontwerp-fase-3.md, chapter 4).
  *
  * @package    local_leerlingendashboard
  * @copyright  2026 Michel Labruyère
@@ -36,6 +36,16 @@ $capabilities = [
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+        ],
+    ],
+
+    // View Mijn Muzieklab: one's own current course, progress, group mates, open assignments and
+    // laptop (design fase 3, chapter 4). Every logged-in user has the role "user" in the system context.
+    'local/leerlingendashboard:viewown' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [
+            'user' => CAP_ALLOW,
         ],
     ],
 ];

@@ -1,6 +1,6 @@
 # Ontwerp fase 3: Mijn Muzieklab
 
-Status: review ronde 1 verwerkt (22-11-2026). Nog geen code.
+Status: review ronde 1 verwerkt (22-11-2026). Gebouwd op branch fase-3-mijn-muzieklab.
 Basis: CLAUDE.md (fase 3), het ontwerp van fase 2 (`docs/ontwerp-fase-2.md`), Moodle 5.2.
 
 ## 1. Doel
@@ -148,22 +148,15 @@ klas. Voorstel:
 - `cli/testdata_vm.php` en `docs/testdata-vm.md` uitbreiden: een groep met zichtbaarheid
   "Eigen" en een met "Niemand", een opdracht die helemaal verborgen is tot ze ontgrendeld
   is, en het verwachte resultaat per leerling.
-- Verwacht met de huidige testgegevens (voorstel, ter controle):
-
-| leerling | huidige cursus | % | groepsgenoten | open opdrachten | laptop |
-|---|---|---|---|---|---|
-| lln-a | Muzieklab test | 75 | Leerling C, Leerkracht Test | geen | Laptop 3 |
-| lln-b | Muzieklab test | 25 | Leerkracht Test | Opdracht 1 (concept), Opdracht 3 | Laptop 7 |
-| lln-d | Muzieklab test | 0 | geen | Opdracht 1, Opdracht 3 (vergrendeld: Opdracht 1 niet voltooid) | link "Kies je laptop" |
-| lln-c | Testcursus A | 100 | Leerling F, Leerkracht Twee | geen | Laptop 5 |
-| lln-g | Testcursus A | 0 | Leerling D | Duo-opdracht, Opdracht individueel | link "Kies je laptop" |
-| lln-h | geen (Testcursus A: inschrijving geschorst, Testcursus B nooit geopend) | – | – | – | – |
+- Verwacht resultaat: zie `docs/testdata-vm.md`, hoofdstuk "Verwacht resultaat in Mijn
+  Muzieklab". Gecontroleerd op de test-VM, als elke leerling zelf en via HTTP.
 
 ## 11. Bestanden (ter info)
 
 ```
 mijn.php                                  // nieuw
-classes/local/leerlingdata.php            // nieuw: gedeelde berekeningen (8)
+classes/local/leerlingdata.php            // nieuw: gedeelde berekeningen per cursus (8)
+classes/local/huidigecursus.php           // nieuw: huidige cursus, voor leerkracht en leerling (3, 8)
 classes/local/klasoverzicht.php           // gebruikt leerlingdata
 classes/output/mijn_muzieklab.php         // nieuw: renderable
 templates/mijn_muzieklab.mustache         // nieuw
@@ -171,7 +164,7 @@ classes/hook_callbacks.php                // link "Mijn Muzieklab"
 db/access.php                             // viewown
 lang/en, lang/nl                          // nieuwe strings
 version.php                               // versieverhoging
-tests/mijn_muzieklab_test.php             // nieuw
+tests/mijn_muzieklab_test.php             // nieuw (7 tests)
 cli/testdata_vm.php, docs/testdata-vm.md  // uitbreiding
 ```
 

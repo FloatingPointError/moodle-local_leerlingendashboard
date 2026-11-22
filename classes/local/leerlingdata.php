@@ -133,7 +133,9 @@ class leerlingdata {
         $params['courseid'] = $this->course->id;
         $visibilitysql = '';
         if ($withvisibility) {
-            [$where, $visparams] = \core_group\visibility::sql_member_visibility_where('g', 'gm2', 'u', 'vis');
+            // Pass gm1 (the student's own membership): the helper checks that $USER is a member of
+            // that group with its own subquery alias gm2, so passing gm2 here would compare gm2 with itself.
+            [$where, $visparams] = \core_group\visibility::sql_member_visibility_where('g', 'gm1', 'u', 'vis');
             $visibilitysql = "AND $where";
             $params += $visparams;
         }

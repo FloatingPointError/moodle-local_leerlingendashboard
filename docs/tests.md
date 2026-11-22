@@ -7,7 +7,10 @@ cd /var/www/moodle
 sudo -u www-data /usr/bin/php8.3 vendor/bin/phpunit --testsuite local_leerlingendashboard_testsuite --do-not-cache-result
 ```
 
-Stand 22-11-2026: 21 tests, 55 controles, alles OK.
+Stand 22-11-2026 (fase 3): 28 tests, 89 controles, alles OK.
+
+Na een versieverhoging van de plugin moet de testsite opnieuw geïnstalleerd worden
+(`--drop` en `--install`, zie hieronder); PHPUnit meldt dat zelf.
 
 ## Opzet (eenmalig, al gedaan op 22-11-2026)
 
