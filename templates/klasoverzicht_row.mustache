@@ -1,0 +1,110 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_leerlingendashboard/klasoverzicht_row
+
+    One row of the class overview. Also rendered on its own after pinning or unpinning.
+
+    Context variables required for this template:
+    * userid, cohortid, pinurl, sesskey - for the pin forms
+    * fullname, profileurl - column 1
+    * hascourse, courseid, coursename, courseurl, pinned, notenrolled - column 2
+    * canpin, pinoptions - the pin selector (id, name)
+    * progress, groupmates, open, opentitle, laptop - columns 3 to 6
+
+    Example context (json):
+    {
+        "userid": 4,
+        "cohortid": 1,
+        "pinurl": "https://example.com/local/leerlingendashboard/pin.php",
+        "sesskey": "abc123",
+        "fullname": "Leerling A",
+        "profileurl": "https://example.com/user/view.php?id=4&course=2",
+        "hascourse": true,
+        "courseid": 2,
+        "coursename": "Muzieklab test",
+        "courseurl": "https://example.com/course/view.php?id=2",
+        "pinned": true,
+        "notenrolled": false,
+        "canpin": true,
+        "pinoptions": [{"id": 3, "name": "Testcursus A"}],
+        "progress": "75 %",
+        "groupmates": "Leerling C, Leerkracht Test",
+        "open": "No",
+        "opentitle": "0 open assignments",
+        "laptop": "Laptop 3"
+    }
+}}
+<tr data-region="student-row" data-userid="{{userid}}" data-cohortid="{{cohortid}}">
+    <th scope="row">
+        {{#profileurl}}<a href="{{profileurl}}">{{fullname}}</a>{{/profileurl}}
+        {{^profileurl}}{{fullname}}{{/profileurl}}
+    </th>
+    <td>
+        {{#hascourse}}
+            <a href="{{courseurl}}">{{coursename}}</a>
+            {{#pinned}}
+                <span class="badge bg-primary ms-1">{{#str}} pinned, local_leerlingendashboard {{/str}}</span>
+            {{/pinned}}
+            {{#notenrolled}}
+                <div class="text-danger small">
+                    {{#pix}} i/warning, core {{/pix}}{{#str}} notenrolled, local_leerlingendashboard {{/str}}
+                </div>
+            {{/notenrolled}}
+        {{/hascourse}}
+        {{^hascourse}}{{coursename}}{{/hascourse}}
+
+        <div class="d-flex flex-wrap gap-1 mt-1">
+            {{#canpin}}
+                <form method="post" action="{{pinurl}}" class="d-flex gap-1" data-action="pin-course">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="action" value="pin">
+                    <input type="hidden" name="userid" value="{{userid}}">
+                    <input type="hidden" name="cohortid" value="{{cohortid}}">
+                    <label for="pin-course-{{userid}}" class="visually-hidden">
+                        {{#str}} pincourse, local_leerlingendashboard, {{fullname}} {{/str}}
+                    </label>
+                    <select name="courseid" id="pin-course-{{userid}}" class="form-select form-select-sm w-auto" required>
+                        <option value="" selected>{{#str}} pinplaceholder, local_leerlingendashboard {{/str}}</option>
+                        {{#pinoptions}}
+                            <option value="{{id}}">{{name}}</option>
+                        {{/pinoptions}}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-outline-primary local_leerlingendashboard-nojs">
+                        {{#str}} pin, local_leerlingendashboard {{/str}}
+                    </button>
+                </form>
+            {{/canpin}}
+            {{#pinned}}
+                <form method="post" action="{{pinurl}}" data-action="unpin-course">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="action" value="unpin">
+                    <input type="hidden" name="userid" value="{{userid}}">
+                    <input type="hidden" name="courseid" value="{{courseid}}">
+                    <input type="hidden" name="cohortid" value="{{cohortid}}">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        {{#str}} unpin, local_leerlingendashboard {{/str}}
+                    </button>
+                </form>
+            {{/pinned}}
+        </div>
+    </td>
+    <td>{{progress}}</td>
+    <td>{{groupmates}}</td>
+    <td>{{#opentitle}}<span title="{{opentitle}}">{{open}}</span>{{/opentitle}}{{^opentitle}}{{open}}{{/opentitle}}</td>
+    <td>{{laptop}}</td>
+</tr>
