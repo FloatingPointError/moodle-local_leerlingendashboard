@@ -1,0 +1,3 @@
+# Niet meenemen in een export (git archive), bv. een zip voor Moodle.
+/CLAUDE.md export-ignore
+/.gitattributes export-ignore

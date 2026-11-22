@@ -10,7 +10,7 @@ Moodle local plugin voor Muzieklab: klasoverzicht voor de leerkracht (later ook 
 
 ## Werkwijze
 - Een aparte branch per fase, bv. fase-2-klasoverzicht. Nooit rechtstreeks op main.
-- Commit en push naar GitHub voor Michel een snapshot terugzet.
+- Commit en push naar GitHub voor de eigenaar een snapshot van de test-VM terugzet.
 - Een privacy-provider is verplicht zodra de plugin zelf gegevens bewaart.
 
 ## Het klasoverzicht: één rij per leerling, zes kolommen
@@ -32,4 +32,14 @@ Moodle local plugin voor Muzieklab: klasoverzicht voor de leerkracht (later ook 
 - Moodle 5.2: tabellen en pagina's volgens de Moodle-conventies (Mustache, eigen layout zonder blokken).
 
 ## Fases
-Fase 2 is het ontwerp (queries, rechten, privacy) en de bouw van de klaspagina. Dat gebeurt in deze volgorde: eerst een ontwerp dat Michel nakijkt, dan pas code.
+Elke fase: eerst een ontwerp dat de eigenaar nakijkt, dan pas code.
+
+Fase 2 (afgerond, gemerged in main op 22-11-2026, PR #1): ontwerp (queries, rechten, privacy) en bouw van de klaspagina. De beslissingen uit de review staan in docs/ontwerp-fase-2.md en gaan voor op de beslissingen hierboven waar ze die verfijnen.
+
+Fase 3 (branch fase-3-mijn-muzieklab): Mijn Muzieklab, de weergave voor de leerling zelf.
+- Een pagina waar de leerling zijn eigen gegevens ziet.
+- Capability viewown voor de leerling, toegekend via de rol "geverifieerde gebruiker".
+- Uitgesteld uit fase 2, mee te nemen in fase 3 of later:
+  - de tabel tijdens de les vanzelf laten bijwerken (dan de reactive UI van Moodle opnieuw bekijken);
+  - een echte grunt-build voor het JavaScript (nu is amd/build een kopie van amd/src);
+  - CI op GitHub met moodle-plugin-ci, eventueel als verplichte check in de ruleset op main.
