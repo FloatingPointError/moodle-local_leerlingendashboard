@@ -39,7 +39,8 @@ Fase 2 (afgerond, gemerged in main op 22-11-2026, PR #1): ontwerp (queries, rech
 Fase 3 (branch fase-3-mijn-muzieklab): Mijn Muzieklab, de weergave voor de leerling zelf.
 - Een pagina waar de leerling zijn eigen gegevens ziet.
 - Capability viewown voor de leerling, toegekend via de rol "geverifieerde gebruiker".
-- Uitgesteld uit fase 2, mee te nemen in fase 3 of later:
+- Ontwerp: docs/ontwerp-fase-3.md.
+- Uitgesteld uit fase 2, niet in fase 3 (pas veel later):
   - de tabel tijdens de les vanzelf laten bijwerken (dan de reactive UI van Moodle opnieuw bekijken);
   - een echte grunt-build voor het JavaScript (nu is amd/build een kopie van amd/src);
   - CI op GitHub met moodle-plugin-ci, eventueel als verplichte check in de ruleset op main.
