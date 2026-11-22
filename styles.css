@@ -1,0 +1,4 @@
+/* With JavaScript, choosing a course pins it right away: the "Pin" button is only for browsers without JS. */
+.jsenabled .local_leerlingendashboard-klasoverzicht .local_leerlingendashboard-nojs {
+    display: none;
+}

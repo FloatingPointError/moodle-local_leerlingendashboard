@@ -218,17 +218,18 @@ $access = [
     ['d', $c3->id, 86400 * 3], ['d', $c2->id, 1800],    // d: nu in Muzieklab test, ook Testcursus A.
     ['f', $c3->id, 86400 * 2], ['f', $c4->id, 300],     // f: lk-test ziet A, lk-test2 ziet B.
     ['g', $c3->id, 5400],
-    ['h', $c3->id, 900],                                // h wordt hierna uitgeschreven uit A.
+    ['h', $c3->id, 900],                                // h wordt hierna geschorst in A.
 ];
 foreach ($access as [$k, $courseid, $ago]) {
     $DB->insert_record('user_lastaccess', ['userid' => $u[$k]->id, 'courseid' => $courseid,
         'timeaccess' => $now - $ago]);
 }
 
-// lln-h uitschrijven uit cursus 3 (waarschuwing "niet meer ingeschreven").
+// Inschrijving van lln-h in Testcursus A schorsen (waarschuwing "niet meer ingeschreven").
+// Niet uitschrijven: dan verwijdert Moodle ook de user_lastaccess-rij (lib/enrollib.php).
 $manual = enrol_get_plugin('manual');
 $instance = $DB->get_record('enrol', ['courseid' => $c3->id, 'enrol' => 'manual'], '*', MUST_EXIST);
-$manual->unenrol_user($instance, $u['h']->id);
+$manual->update_user_enrol($instance, $u['h']->id, ENROL_USER_SUSPENDED);
 
 $transaction->allow_commit();
 purge_caches(['courses' => true]);

@@ -1,0 +1,100 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_leerlingendashboard/klasoverzicht
+
+    Class overview: cohort selector and one row per student with six columns.
+
+    Context variables required for this template:
+    * cohortselect - HTML of the cohort selector
+    * hascohorts - whether there are cohorts
+    * hascohort - whether a cohort is chosen
+    * cohortname - name of the chosen cohort
+    * pinurl - URL of pin.php
+    * sesskey - session key
+    * cohortid - id of the chosen cohort
+    * hasrows - whether the cohort has students
+    * rows - one per student, see local_leerlingendashboard/klasoverzicht_row
+
+    Example context (json):
+    {
+        "cohortselect": "<select></select>",
+        "hascohorts": true,
+        "hascohort": true,
+        "cohortname": "Muzieklab ma 16u",
+        "pinurl": "https://example.com/local/leerlingendashboard/pin.php",
+        "sesskey": "abc123",
+        "cohortid": 1,
+        "hasrows": true,
+        "rows": [
+            {
+                "userid": 4,
+                "fullname": "Leerling A",
+                "profileurl": "https://example.com/user/view.php?id=4&course=2",
+                "hascourse": true,
+                "courseid": 2,
+                "coursename": "Muzieklab test",
+                "courseurl": "https://example.com/course/view.php?id=2",
+                "pinned": true,
+                "notenrolled": false,
+                "progress": "75 %",
+                "groupmates": "Leerkracht Test, Leerling C",
+                "open": "No",
+                "opentitle": "0 open assignments",
+                "laptop": "Laptop 3",
+                "canpin": false,
+                "pinoptions": []
+            }
+        ]
+    }
+}}
+<div class="local_leerlingendashboard-klasoverzicht" data-region="local_leerlingendashboard-klasoverzicht">
+    {{#hascohorts}}
+        <div class="mb-3">{{{cohortselect}}}</div>
+    {{/hascohorts}}
+    {{^hascohorts}}
+        <div class="alert alert-info">{{#str}} nocohorts, local_leerlingendashboard {{/str}}</div>
+    {{/hascohorts}}
+
+    {{#hascohort}}
+        {{^hasrows}}
+            <div class="alert alert-info">{{#str}} nostudents, local_leerlingendashboard {{/str}}</div>
+        {{/hasrows}}
+        {{#hasrows}}
+        <div class="table-responsive">
+            <table class="generaltable table table-striped table-hover">
+                <caption class="visually-hidden">{{cohortname}}</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">{{#str}} colstudent, local_leerlingendashboard {{/str}}</th>
+                        <th scope="col">{{#str}} colcourse, local_leerlingendashboard {{/str}}</th>
+                        <th scope="col">{{#str}} colprogress, local_leerlingendashboard {{/str}}</th>
+                        <th scope="col">{{#str}} colgroupmates, local_leerlingendashboard {{/str}}</th>
+                        <th scope="col">{{#str}} colopen, local_leerlingendashboard {{/str}}</th>
+                        <th scope="col">{{#str}} collaptop, local_leerlingendashboard {{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#rows}}
+                        {{> local_leerlingendashboard/klasoverzicht_row }}
+                    {{/rows}}
+                </tbody>
+            </table>
+        </div>
+        {{/hasrows}}
+    {{/hascohort}}
+</div>

@@ -32,7 +32,8 @@ Wachtwoord van alle nieuwe accounts: `Test-Muzieklab1!`
   - woe 14u: d, f, g, h. lln-d zit in beide.
 - **Inschrijvingen**
   - Muzieklab test: c, d, e.
-  - Testcursus A: c, d, f, g. lln-h is er na een bezoek weer uitgeschreven.
+  - Testcursus A: c, d, f, g, h. De inschrijving van lln-h wordt na een bezoek geschorst.
+    (Niet uitgeschreven: dan verwijdert Moodle ook de `user_lastaccess`-rij.)
   - Testcursus B: f, h.
 - **Groepen**
   - lln-c komt erbij in Groep A.
@@ -59,7 +60,7 @@ Wachtwoord van alle nieuwe accounts: `Test-Muzieklab1!`
 
 | leerkracht | cohort | leerling | huidige cursus | % | groepsgenoten | open | laptop |
 |---|---|---|---|---|---|---|---|
-| lk-test | ma 16u | lln-a | Muzieklab test | 75 | Leerkracht Test, Leerling C | nee | Laptop 3 |
+| lk-test | ma 16u | lln-a | Muzieklab test | 75 | Leerling C, Leerkracht Test | nee | Laptop 3 |
 | lk-test | ma 16u | lln-b | Muzieklab test | 25 | Leerkracht Test | ja (concept) | Laptop 7 |
 | lk-test | ma 16u | lln-c | Testcursus A | 100 | Leerling F, Leerkracht Twee | nee | Laptop 5 |
 | lk-test | ma 16u | lln-d | Muzieklab test | 0 | geen | ja | – |
@@ -73,6 +74,11 @@ Wachtwoord van alle nieuwe accounts: `Test-Muzieklab1!`
 | lk-test2 | woe 14u | lln-h | Testcursus A + waarschuwing | – | geen | ja | – |
 | lk-test2 | ma 16u | lln-a, lln-b | geen | – | – | – | – |
 | lk-test2 | ma 16u | lln-c | Testcursus A | 100 | Leerling F, Leerkracht Twee | nee | Laptop 5 |
+
+Groepsgenoten staan gesorteerd op achternaam ("Leerling C" vóór "Leerkracht Test").
+Kolom 2 toont onder elke cursus een keuzelijst "Vastzetten op..." met de eigen cursussen
+waarin de leerling actief ingeschreven is. Een cursus kiezen zet die meteen vast en vernieuwt
+alleen die rij. Is de cursus vastgezet, dan staat er ook een knop "Losmaken".
 
 Een paar regels die je hiermee test:
 

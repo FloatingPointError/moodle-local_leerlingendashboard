@@ -100,23 +100,56 @@ SELECT ula.id, ula.userid, ula.courseid, ula.timeaccess
  ORDER BY ula.userid, ula.timeaccess DESC
 ```
 
-In PHP per leerling de eerste rij nemen (de recentste). `user_lastaccess` blijft
-bestaan na uitschrijving, daarom de controle in 4.3.
+In PHP per leerling de eerste rij nemen (de recentste).
+
+Let op (gevonden tijdens de bouw): bij een volledige uitschrijving verwijdert Moodle ook
+de `user_lastaccess`-rij van die cursus (`lib/enrollib.php`). Bij een **geschorste of
+verlopen** inschrijving blijft de rij wel staan. Een vastzetting blijft na uitschrijving
+ook staan.
 
 ### 4.3 Voorwaarden (beslist)
 
 - Of de cursus nu vastgezet is of de laatst geopende is: is de leerling er niet meer
   **actief ingeschreven** (`is_enrolled($context, $userid, '', true)`), dan wordt de
-  cursus toch getoond, met een waarschuwing ("niet meer ingeschreven").
+  cursus toch getoond, met een waarschuwing ("niet meer ingeschreven"). In de praktijk
+  gebeurt dat bij een vastgezette cursus waaruit de leerling is uitgeschreven, en bij een
+  geschorste of verlopen inschrijving (zie 4.2).
   Kolom 3 tot 6 worden dan nog steeds berekend, voor zover Moodle de gegevens heeft.
 - Geen cursus gevonden: cel toont "geen", kolom 3 tot 6 tonen "–".
 - In de cel staat een icoon/label als de cursus vastgezet is, plus een knop
-  "vastzetten/losmaken" (POST met `sesskey`, zie 9.4).
+  "vastzetten/losmaken" (zie 4.4 en 9.4).
 - Heeft de leerling geen enkele eigen cursus van de leerkracht geopend en is er niets
   vastgezet, dan toont de cel "geen". Cursussen van collega's komen nooit in beeld.
 
 Opmerking: `user_lastaccess` wordt hoogstens elke 60 seconden bijgewerkt
 (`LASTACCESS_UPDATE_SECS`). Voor dit doel ruim voldoende.
+
+### 4.4 Vastzetten in de pagina (beslist in reviewronde 5)
+
+Een cursus kiezen in de keuzelijst zet die cursus **meteen** vast. Alleen de rij van die
+leerling wordt vernieuwd, de pagina herlaadt niet.
+
+- Keuzelijst: "Vastzetten op..." gevolgd door de eigen cursussen waarin de leerling
+  actief ingeschreven is, zonder de cursus die al vastgezet is. Is de cursus vastgezet,
+  dan staat ernaast een knop "Losmaken".
+- Werking: het AMD-module `local_leerlingendashboard/klasoverzicht` roept de webservice
+  `local_leerlingendashboard_pin_course` (of `_unpin_course`) aan. Die doet dezelfde
+  controles als `pin.php` (`pins::require_can_change()`), zet vast en geeft de nieuwe rij
+  terug als HTML, getekend met dezelfde template `klasoverzicht_row`. De browser vervangt
+  de rij (`core/templates`) en toont een melding (`core/toast`).
+- Zonder JavaScript posten de formulieren naar `pin.php` en herlaadt de pagina; de knop
+  "Vastzetten" is dan zichtbaar.
+- Overwogen en niet gekozen:
+  - Moodle's reactive UI (`core/reactive`): bedoeld voor ingewikkelde toestand in de
+    browser (zoals de cursuseditor). Voor één wijziging per rij is dat veel extra code.
+    Opnieuw bekijken als de tabel tijdens de les vanzelf moet bijwerken.
+  - Cachen (MUC): de cache zou leeg moeten bij elke voltooiing, inzending, groepswijziging,
+    keuze-antwoord en paginabezoek, en de leerkracht wil verse cijfers. Gemeten op de
+    test-VM: een klas van 4 leerlingen kost 20-130 ms en 50-80 queries (ongeveer 13 per
+    leerling). Pas opnieuw bekijken als een echte klas te traag is.
+- Geen grunt/node op de test-VM: de bron is daarom een klassiek AMD-module en
+  `amd/build/klasoverzicht.min.js` is een kopie ervan. Met grunt kan het later echt
+  gebouwd worden.
 
 ## 5. Kolom 3: Cursusvoltooiing in %
 
@@ -349,10 +382,11 @@ Wat een leerkracht dan te zien krijgt, staat in 9.4.
 
 | capability                                | type  | contextniveau | risico          | archetypes                       |
 |-------------------------------------------|-------|---------------|-----------------|----------------------------------|
-| `local/leerlingendashboard:viewclass`     | read  | cursus        | `RISK_PERSONAL` | editingteacher, manager: allow   |
+| `local/leerlingendashboard:viewclass`     | write | cursus        | `RISK_PERSONAL` | editingteacher, manager: allow   |
 
 - `viewclass`: de klaspagina bekijken, en cursussen vastzetten en losmaken (beslist:
-  geen aparte capability voor vastzetten).
+  geen aparte capability voor vastzetten). Daarom `captype` write: vastzetten wijzigt
+  gegevens.
 - De niet-bewerkende leraar (`teacher`) krijgt niets. Wil je dat wel, dan voeg je dat
   toe in de roldefinitie.
 - `viewown` voor de leerling komt pas in een latere fase; nu nog niet definiëren
@@ -444,36 +478,48 @@ Geen gebruikersvoorkeur voor het laatst gekozen cohort (anders ook een
 spoor; dat gaat via de standaard logstore, die zijn eigen privacy regelt. Een
 `class_viewed`-event is optioneel.
 
-## 11. Bestanden in de bouwfase (ter info)
+## 11. Bestanden
 
 ```
 version.php
 lang/en/local_leerlingendashboard.php
 lang/nl/local_leerlingendashboard.php
-db/access.php
-db/install.xml
-db/events.php
-index.php
-pin.php
-classes/local/klasoverzicht.php      // de queries uit dit document
-classes/output/klasoverzicht.php     // renderable/templatable
+db/access.php                        // capability viewclass
+db/install.xml                       // tabel local_leerlingendashboard_pin
+db/upgrade.php                       // maakt de tabel aan vanaf versie 2026112200
+db/events.php                        // observers user_deleted, course_deleted
+db/hooks.php                         // link in de primaire navigatie
+index.php                            // de klaspagina
+pin.php                              // vastzetten/losmaken zonder JavaScript (POST)
+styles.css                           // verbergt de knop "Vastzetten" als JavaScript aanstaat
+amd/src/klasoverzicht.js             // vastzetten bij kiezen, rij vernieuwen (4.4)
+amd/build/klasoverzicht.min.js       // kopie van de bron (geen grunt op de VM)
+db/services.php                      // webservices pin_course en unpin_course
+classes/hook_callbacks.php
 classes/observer.php
-classes/privacy/provider.php
+classes/local/access.php             // hoofdstuk 9
+classes/local/klasoverzicht.php      // hoofdstukken 2 tot 8
+classes/local/progress.php           // hoofdstuk 5
+classes/local/pins.php               // hoofdstuk 4.1 en 9.4
+classes/output/klasoverzicht.php     // renderable/templatable
+classes/external/pin_base.php        // gedeelde code van de webservices
+classes/external/pin_course.php
+classes/external/unpin_course.php
+classes/privacy/provider.php         // hoofdstuk 10
 classes/event/course_pinned.php
 classes/event/course_unpinned.php
 templates/klasoverzicht.mustache
-tests/klasoverzicht_test.php         // PHPUnit met testleerlingen
+templates/klasoverzicht_row.mustache // één rij, ook apart getekend na vastzetten
+tests/klasoverzicht_test.php
+tests/external/pin_course_test.php
 tests/privacy/provider_test.php
+cli/testdata_vm.php                  // testgegevens, alleen voor de test-VM
 ```
 
-## 12. Testdata op de VM (stand 22-11-2026)
+## 12. Testdata op de VM
 
-- Cohorten: "Muzieklab ma 16u" en "Muzieklab woe 14u", allebei **zonder leden**.
-- Cursussen: ML Test, testcursus-a, testcursus-b (voltooiing aan; b zonder groepsmodus).
-- 2 groepen, 0 opdrachten (`mod_assign`), 0 keuze-activiteiten met ID-nummer "laptop…".
-
-Voor een zinvolle test zijn testleerlingen in de cohorten, opdrachten (ook een
-groepsopdracht en een verborgen opdracht) en een laptop-keuze nodig.
+Zie `docs/testdata-vm.md`: beginsituatie, wat `cli/testdata_vm.php` aanmaakt en het
+verwachte resultaat per leerkracht.
 
 ## 13. Beslissingen uit de review (22-11-2026)
 
@@ -509,6 +555,11 @@ Ronde 4:
 
 14. Voortgang wordt berekend met de zichtbaarheid van de leerling, niet van de
     leerkracht (zie 5.2).
+
+Ronde 5:
+
+15. Een cursus kiezen in de keuzelijst zet die meteen vast; alleen die rij wordt vernieuwd
+    (zie 4.4). Geen reactive UI en geen cache.
 
 ## 14. Nog open
 
