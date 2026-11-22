@@ -1,6 +1,6 @@
 # Ontwerp fase 2: klasoverzicht
 
-Status: concept, reviewrondes 1 tot 4 van Michel verwerkt (22-11-2026).
+Status: concept, reviewrondes 1 tot 5 van de eigenaar verwerkt (22-11-2026).
 Basis: CLAUDE.md, Moodle 5.2 (5.2.5+, build 20261117), PHP 8.3.
 
 ## 1. Overzicht
